@@ -1,4 +1,3 @@
-import { Separator } from "@/components/ui/separator";
 import Overview from "./sections/overview";
 import RealtimeActivity from "./sections/realTimeActivity";
 import VawActivity from "./sections/vawActivity";

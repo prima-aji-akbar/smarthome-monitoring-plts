@@ -3,10 +3,10 @@
 import { ChartAreaAxes } from "@/components/custom/charts/chartAreaAxes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Zap, Activity } from "lucide-react";
-import { useState } from "react";
+// import { useState } from "react";
 
 export default function VawActivity() {
-    const [statusCheck, setStatusCheck] = useState(false);
+    // const [statusCheck, setStatusCheck] = useState(false);
 
     return (
         <div className="w-full">
