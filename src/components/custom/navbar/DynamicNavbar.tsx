@@ -20,7 +20,7 @@ export default function DynamicNavbar() {
           Home / {getPageTitle()}
         </span>
       </div>
-      <h1 className="text-lg sm:text-xl md:text-2xl font-bold whitespace-nowrap pr-4">
+      <h1 className="text-lg sm:text-xl md:text-2xl font-bold whitespace-nowrap lg:pr-6">
         {getPageTitle()}
       </h1>
     </div>
