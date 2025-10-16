@@ -59,7 +59,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="shadow-xl">
-      <SidebarHeader>
+      <SidebarHeader className="mb-4">
         <SidebarGroupLabel>
           <div className="flex gap-2">
             <Image 
@@ -73,7 +73,7 @@ export function AppSidebar() {
           </div>
         </SidebarGroupLabel>
       </SidebarHeader>
-      
+      <Separator/>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>

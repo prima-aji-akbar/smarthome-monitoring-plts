@@ -1,6 +1,7 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Heart, Zap, History, ArrowLeftRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -41,41 +42,48 @@ export default function Overview() {
 
     return (
         <div className="w-full flex flex-col h-full">
-            <div className="mb-2 sm:mb-3">
-                <h1 className="font-bold text-sm sm:text-base lg:text-lg">Overview</h1>
+            <div className="mb-3 sm:mb-4">
+                <h1 className="font-bold text-lg sm:text-xl lg:text-2xl text-slate-800 dark:text-slate-100">Overview</h1>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4 flex-1">
+            
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-5 flex-1">
                 {/* Status Card */}
-                <Card className="flex flex-col">
-                    <CardContent className="p-2 sm:p-3 lg:p-4 flex-1 flex flex-col">
-                        <div className="flex gap-1 sm:gap-2 lg:gap-3 pb-1 sm:pb-2 items-center mb-1 sm:mb-2">
-                            <Heart className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 shrink-0" />
-                            <h1 className="font-semibold text-[10px] sm:text-xs lg:text-sm truncate">
-                                Status
-                            </h1>
+                <Card className="flex flex-col bg-gradient-to-br from-blue-400 to-blue-500 border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                            <h2 className="text-white font-bold text-xs sm:text-sm lg:text-base">Status</h2>
+                            <div className="bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-2.5">
+                                <Heart className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white animate-pulse" fill="white" />
+                            </div>
                         </div>
-                        <div className="flex-1 flex items-center">
+                    </CardHeader>
+                    <Separator className="bg-white/20" />
+                    <CardContent className="p-3 sm:p-4 flex-1 flex flex-col justify-end">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2.5 sm:p-3 lg:p-4 shadow-md">
                             {systemStatus === 'online' ? (
-                                <div className="w-full bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded p-1.5 sm:p-2 lg:p-3">
-                                    <div className="flex items-center gap-1 sm:gap-2">
-                                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                        <h1 className="text-[10px] sm:text-xs lg:text-sm font-semibold text-green-700 dark:text-green-300">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative">
+                                            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-green-500 rounded-full"></div>
+                                            <div className="absolute inset-0 w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-green-500 rounded-full animate-ping opacity-75"></div>
+                                        </div>
+                                        <h1 className="text-sm sm:text-base lg:text-xl font-bold text-green-700">
                                             Online
                                         </h1>
                                     </div>
-                                    <p className="text-[8px] sm:text-[10px] text-green-600 dark:text-green-400 mt-0.5 sm:mt-1">
-                                        System Running
+                                    <p className="text-[10px] sm:text-xs text-green-600 mt-1 font-medium">
+                                        System Running Normally
                                     </p>
                                 </div>
                             ) : (
-                                <div className="w-full bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded p-1.5 sm:p-2 lg:p-3">
-                                    <div className="flex items-center gap-1 sm:gap-2">
-                                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full"></div>
-                                        <h1 className="text-[10px] sm:text-xs lg:text-sm font-semibold text-red-700 dark:text-red-300">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded-full"></div>
+                                        <h1 className="text-sm sm:text-base lg:text-xl font-bold text-red-700">
                                             Offline
                                         </h1>
                                     </div>
-                                    <p className="text-[8px] sm:text-[10px] text-red-600 dark:text-red-400 mt-0.5 sm:mt-1">
+                                    <p className="text-[10px] sm:text-xs text-red-600 mt-1 font-medium">
                                         System Down
                                     </p>
                                 </div>
@@ -85,78 +93,87 @@ export default function Overview() {
                 </Card>
 
                 {/* Source Card */}
-                <Card className="flex flex-col">
-                    <CardContent className="p-2 sm:p-3 lg:p-4 flex-1 flex flex-col">
-                        <div className="flex gap-1 sm:gap-2 lg:gap-3 pb-1 sm:pb-2 items-center mb-1 sm:mb-2">
-                            <Zap className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 shrink-0" />
-                            <h1 className="font-semibold text-[10px] sm:text-xs lg:text-sm truncate">
-                                Source
-                            </h1>
-                        </div>
-                        <div className="flex-1 flex items-center">
-                            <div className={`w-full rounded p-1.5 sm:p-2 lg:p-3 ${
-                                currentSource === 'PLN' 
-                                    ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700' 
-                                    : 'bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700'
-                            }`}>
-                                <h1 className={`text-xs sm:text-sm lg:text-base font-bold ${
-                                    currentSource === 'PLN'
-                                        ? 'text-blue-700 dark:text-blue-300'
-                                        : 'text-amber-700 dark:text-amber-300'
-                                }`}>
-                                    {currentSource}
-                                </h1>
-                                <p className={`text-[8px] sm:text-[10px] mt-0.5 sm:mt-1 ${
-                                    currentSource === 'PLN'
-                                        ? 'text-blue-600 dark:text-blue-400'
-                                        : 'text-amber-600 dark:text-amber-400'
-                                }`}>
-                                    {currentSource === 'PLN' ? 'Grid Power' : 'Solar Power'}
-                                </p>
+                <Card className="flex flex-col bg-gradient-to-br from-amber-400 to-amber-500 border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                            <h2 className="text-white font-semibold text-xs sm:text-sm lg:text-base">Source</h2>
+                            <div className="bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-2.5">
+                                <Zap className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" fill="white" />
                             </div>
+                        </div>
+                    </CardHeader>
+                    <Separator className="bg-white/20" />
+                    <CardContent className="p-3 sm:p-4 flex-1 flex flex-col justify-end">
+                        <div className={`bg-white/95 backdrop-blur-sm rounded-xl p-2.5 sm:p-3 lg:p-4 shadow-md border-l-4 ${
+                            currentSource === 'PLN' 
+                                ? 'border-blue-500' 
+                                : 'border-orange-500'
+                        }`}>
+                            <h1 className={`text-base sm:text-lg lg:text-2xl font-bold ${
+                                currentSource === 'PLN'
+                                    ? 'text-blue-700'
+                                    : 'text-orange-700'
+                            }`}>
+                                {currentSource}
+                            </h1>
+                            <p className={`text-[10px] sm:text-xs mt-1 font-medium ${
+                                currentSource === 'PLN'
+                                    ? 'text-blue-600'
+                                    : 'text-orange-600'
+                            }`}>
+                                {currentSource === 'PLN' ? '⚡ Grid Power' : '☀️ Solar Power'}
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* Uptime Card */}
-                <Card className="flex flex-col">
-                    <CardContent className="p-2 sm:p-3 lg:p-4 flex-1 flex flex-col">
-                        <div className="flex gap-1 sm:gap-2 lg:gap-3 pb-1 sm:pb-2 items-center mb-1 sm:mb-2">
-                            <History className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 shrink-0" />
-                            <h1 className="font-semibold text-[10px] sm:text-xs lg:text-sm truncate">
-                                Uptime
-                            </h1>
-                        </div>
-                        <div className="flex-1 flex items-center">
-                            <div className="w-full bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 rounded p-1.5 sm:p-2 lg:p-3">
-                                <h1 className="text-sm sm:text-base lg:text-xl font-bold text-purple-700 dark:text-purple-300 font-mono">
-                                    {formatUptime(uptime)}
-                                </h1>
-                                <p className="text-[8px] sm:text-[10px] text-purple-600 dark:text-purple-400 mt-0.5 sm:mt-1">
-                                    Hours Running
-                                </p>
+                <Card className="flex flex-col bg-gradient-to-br from-green-400 to-green-500 border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                            <h2 className="text-white font-semibold text-xs sm:text-sm lg:text-base">Uptime</h2>
+                            <div className="bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-2.5">
+                                <History className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white animate-spin" style={{ animationDuration: '3s' }} />
                             </div>
+                        </div>
+                    </CardHeader>
+                    <Separator className="bg-white/20" />
+                    <CardContent className="p-3 sm:p-4 flex-1 flex flex-col justify-end">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2.5 sm:p-3 lg:p-4 shadow-md border-l-4 border-purple-500">
+                            <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-purple-700 font-mono tracking-tight">
+                                {formatUptime(uptime)}
+                            </h1>
+                            <p className="text-[10px] sm:text-xs text-purple-600 mt-1 font-medium">
+                                ⏱️ Hours Running
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* Last Switch Card */}
-                <Card className="flex flex-col">
-                    <CardContent className="p-2 sm:p-3 lg:p-4 flex-1 flex flex-col">
-                        <div className="flex gap-1 sm:gap-2 lg:gap-3 pb-1 sm:pb-2 items-center mb-1 sm:mb-2">
-                            <ArrowLeftRight className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 shrink-0" />
-                            <h1 className="font-semibold text-[10px] sm:text-xs lg:text-sm truncate">
-                                Last Switch
-                            </h1>
+                <Card className="flex flex-col bg-gradient-to-br from-red-400 to-red-500 border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                            <h2 className="text-white font-semibold text-xs sm:text-sm lg:text-base">Last Switch</h2>
+                            <div className="bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-2.5">
+                                <ArrowLeftRight className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
+                            </div>
                         </div>
-                        <div className="flex-1 flex items-center">
-                            <div className="w-full bg-slate-100 dark:bg-slate-800/30 border border-slate-300 dark:border-slate-700 rounded p-1.5 sm:p-2 lg:p-3">
-                                <p className="text-[9px] sm:text-[10px] lg:text-xs text-slate-700 dark:text-slate-300 font-medium break-words leading-tight">
-                                    {formatTimestamp(lastSwitch)}
-                                </p>
-                                <p className="text-[8px] sm:text-[9px] text-slate-600 dark:text-slate-400 mt-0.5 sm:mt-1">
-                                    PLN → PLTS
-                                </p>
+                    </CardHeader>
+                    <Separator className="bg-white/20" />
+                    <CardContent className="p-3 sm:p-4 flex-1 flex flex-col justify-end">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2.5 sm:p-3 lg:p-4 shadow-md border-l-4 border-indigo-500">
+                            <p className="text-[10px] sm:text-xs lg:text-sm text-slate-700 font-semibold leading-relaxed">
+                                {formatTimestamp(lastSwitch)}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                                <span className="text-[9px] sm:text-[10px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                    PLN
+                                </span>
+                                <ArrowLeftRight className="w-3 h-3 text-slate-400" />
+                                <span className="text-[9px] sm:text-[10px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                    PLTS
+                                </span>
                             </div>
                         </div>
                     </CardContent>
