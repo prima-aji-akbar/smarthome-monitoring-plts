@@ -1,6 +1,6 @@
 "use client"
 
-import { Logs, LogOut, LayoutDashboard, Moon, Sun } from "lucide-react"
+import { Logs, LogOut, LayoutDashboard, Moon, Sun, Joystick } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image";
 import { useTheme } from "next-themes"
@@ -21,12 +21,18 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
+import { title } from "process";
 
 const items = [
   {
     title: "Dashboard",
     url: "/views/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Switch Control",
+    url: "/views/switch-control",
+    icon: Joystick
   },
   {
     title: "Event Log",

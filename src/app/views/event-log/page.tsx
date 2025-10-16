@@ -7,6 +7,8 @@ export default function EventLog() {
   ]
 
   return (
+    <div className="w-full">
+      <div className="bg-[var(--body-background)] min-h-screen">
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4">Event Log</h1>
       <div className="bg-white rounded-lg shadow">
@@ -29,6 +31,8 @@ export default function EventLog() {
           </tbody>
         </table>
       </div>
+    </div>
+    </div>
     </div>
   )
 }

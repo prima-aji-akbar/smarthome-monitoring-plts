@@ -9,6 +9,7 @@ export default function DynamicNavbar() {
     if (pathname.includes('/dashboard')) return 'Dashboard';
     if (pathname.includes('/event-log')) return 'Event Log';
     if (pathname.includes('/logout')) return 'Logout';
+    if (pathname.includes('/switch-control')) return 'Switch Control';
     return 'Dashboard';
   };
 

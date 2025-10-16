@@ -118,7 +118,32 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: 
+      linear-gradient(
+        oklch(91.279% 0.0001 271.152 / 0.45),
+        oklch(91.279% 0.0001 271.152 / 0.45)
+      ),
+      url('/images/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
+}
+
+/* Background untuk dark mode */
+.dark body {
+  background: 
+    linear-gradient(
+      oklch(28.094% 0.00003 271.152 / 1),
+      oklch(28.094% 0.00003 271.152 / 1)
+    ),
+    url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
