@@ -1,9 +1,11 @@
 "use client"
 
-import { Home, Inbox, LogOut, LayoutDashboard, Moon, Sun } from "lucide-react"
+import { Logs, LogOut, LayoutDashboard, Moon, Sun } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image";
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import logoSidebar from "@/components/icons/logo-sidebar.png";
 
 import {
   Sidebar,
@@ -29,7 +31,7 @@ const items = [
   {
     title: "Event Log",
     url: "/views/event-log",
-    icon: Inbox,
+    icon: Logs,
   },
   {
     title: "Logout",
@@ -51,15 +53,22 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar>
+    <Sidebar className="shadow-xl">
       <SidebarHeader>
         <SidebarGroupLabel>
-          <div className="">
+          <div className="flex gap-2">
+            <Image 
+                src={logoSidebar} 
+                alt="ATS Logo" 
+                width={32}
+                height={32}
+                className="object-contain"
+            />
             <h1 className="font-extrabold">ATS Monitoring System</h1>
           </div>
         </SidebarGroupLabel>
       </SidebarHeader>
-      <Separator />
+      
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>

@@ -4,6 +4,8 @@ import "@/app/styles/globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/custom/app-sidebar/app-sidebar"
 import { ThemeProvider } from "@/components/themes/theme-provider"
+import DynamicNavbar from "@/components/custom/navbar/DynamicNavbar"
+import { Separator } from "@/components/ui/separator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,9 +34,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           <SidebarProvider>
             <AppSidebar />
-            <main className="w-full">
-              <SidebarTrigger />
-              {children}
+            <main className="w-full min-h-screen flex flex-col">
+              <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+                <div className="flex items-center gap-2 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+                  <SidebarTrigger className="shrink-0" />
+                  <Separator orientation="vertical" className="h-6 mx-2 hidden sm:block" />
+                  <DynamicNavbar />
+                </div>
+              </div>
+              <div className="flex-1 w-full overflow-x-hidden">
+                {children}
+              </div>
             </main>
           </SidebarProvider>
         </ThemeProvider>
