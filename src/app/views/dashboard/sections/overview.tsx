@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 export default function Overview() {
     const [uptime, setUptime] = useState(0);
     const [systemStatus,] = useState<'online' | 'offline'>('online');
-    const [currentSource,] = useState<'PLN' | 'PLTS'>('PLN');
+    const [currentSource,] = useState<'PLN' | 'PLTS'>('PLTS');
     const [lastSwitch,] = useState(new Date());
 
     // Uptime counter

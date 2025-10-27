@@ -24,17 +24,18 @@ const chartData = [
 const chartConfig = {
   desktop: {
     label: "Desktop",
-    color: "var(--chart-1)",
+    color: "#8b5cf6",
   },
   mobile: {
     label: "Mobile",
-    color: "var(--chart-2)",
+    color: "#3b82f6",
   },
 } satisfies ChartConfig
 
 export function ChartAreaAxes() {
   return (
     <div className="w-full">
+      <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800 shadow-lg">
         <ChartContainer config={chartConfig} className="h-[150px] sm:h-[180px] md:h-[200px] w-full">
           <AreaChart
             accessibilityLayer
@@ -46,13 +47,14 @@ export function ChartAreaAxes() {
               bottom: 8,
             }}
           >
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-purple-200 dark:stroke-purple-800" />
             <XAxis
               dataKey="month"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               tick={{ fontSize: 11 }}
+              className="text-purple-700 dark:text-purple-300"
               tickFormatter={(value) => value.slice(0, 3)}
             />
             <YAxis
@@ -61,10 +63,11 @@ export function ChartAreaAxes() {
               tickMargin={8}
               tickCount={5}
               tick={{ fontSize: 11 }}
+              className="text-purple-700 dark:text-purple-300"
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent indicator="line" className="text-xs" />}
+              content={<ChartTooltipContent indicator="line" className="text-xs bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm" />}
             />
             <Area
               dataKey="mobile"
@@ -90,6 +93,7 @@ export function ChartAreaAxes() {
             />
           </AreaChart>
         </ChartContainer>
+      </div>
     </div>
   )
 }

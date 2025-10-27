@@ -1,14 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { ChartLineInteractive } from "@/components/custom/charts/chart-line-linear";
+import { ChartLineInteractive } from "@/components/custom/charts/chart-line-interactive";
 
-export default function RealtimeActivity() {
+export default function BatteryUsage(){
     return (
         <div className="w-full flex flex-col h-full">
             <div className="mb-3 sm:mb-4">
                 <div className="flex items-center gap-2">
 
                     <h1 className="font-bold text-lg sm:text-xl lg:text-2xl text-slate-800 dark:text-slate-100">
-                        Realtime Activity
+                        Battery Usage
                     </h1>
                 </div>
             </div>

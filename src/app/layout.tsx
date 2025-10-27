@@ -4,7 +4,7 @@ import "@/app/styles/globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/custom/app-sidebar/app-sidebar"
 import { ThemeProvider } from "@/components/themes/theme-provider"
-import DynamicNavbar from "@/components/custom/navbar/DynamicNavbar"
+import DynamicNavbar from "@/components/custom/navbar/dynamic-navbar"
 import { Separator } from "@/components/ui/separator";
 
 const geistSans = Geist({

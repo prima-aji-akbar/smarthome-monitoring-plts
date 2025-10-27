@@ -1,6 +1,6 @@
 "use client"
 
-import { ChartAreaAxes } from "@/components/custom/charts/chartAreaAxes";
+import { ChartAreaAxes } from "@/components/custom/charts/chart-area-axes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Zap, Activity } from "lucide-react";
 // import { useState } from "react";

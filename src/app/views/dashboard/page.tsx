@@ -1,6 +1,8 @@
+import BatteryStatus from "./sections/battery-status";
+import BatteryUsage from "./sections/battery-usage";
 import Overview from "./sections/overview";
-import RealtimeActivity from "./sections/realTimeActivity";
-import VawActivity from "./sections/vawActivity";
+import RealtimeActivity from "./sections/real-time-activity";
+import VawActivity from "./sections/vaw-activity";
 
 export default function Dashboard() {
   return (
@@ -17,6 +19,16 @@ export default function Dashboard() {
               <RealtimeActivity />
             </div>
             
+            {/* AC/DC dan Battery */}
+            <div className="w-full lg:col-span-2 flex">
+              <BatteryUsage/>
+            </div>
+
+            {/* AC/DC dan Battery */}
+            <div className="w-full lg:col-span-1 flex">
+              <BatteryStatus/>
+            </div>
+
             {/* VAW Activity - Full width on all screens */}
             <div className="w-full lg:col-span-3">
               <VawActivity/>
