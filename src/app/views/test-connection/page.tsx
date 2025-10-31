@@ -34,8 +34,8 @@ export default function TestConnectionPage() {
     try {
       await sendRandomLogToFirestore();
       alert("1 log palsu (Firestore) telah dikirim!");
-    } catch (e: any) {
-      alert("Gagal mengirim log: " + e.message);
+    } catch {
+      alert("Gagal mengirim log");
     }
     setSeedLoading(null);
   };
@@ -47,8 +47,8 @@ export default function TestConnectionPage() {
       // Panggil 'sendFullDummySnapshot'
       await sendFullDummySnapshot();
       alert("1 snapshot palsu LENGKAP (Realtime + Config + Control + EventLog) telah dikirim!");
-    } catch (e: any) {
-      alert("Gagal mengirim data realtime: " + e.message);
+    } catch {
+      alert("Gagal mengirim data realtime: ");
     }
     setSeedLoading(null);
   };

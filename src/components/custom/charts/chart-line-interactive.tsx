@@ -9,16 +9,18 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
+type ChartDataPoint = Record<string, number | string | null | undefined>;
+
 interface DynamicLineChartProps {
-  chartData: any[];
+  chartData: ChartDataPoint[]; 
   chartConfig: ChartConfig;
   xAxisDataKey: string;
   dataKey: string; 
-  xAxisTickFormatter?: (value: any) => string;
   wrapperClassName?: string;
   heightClassName?: string;
-  // 1. Tambahkan prop baru untuk tooltip formatter
-  tooltipLabelFormatter?: (label: any) => React.ReactNode; 
+  xAxisTickFormatter?: (value: string | number | null | undefined, index?: number) => string; 
+  // tooltip formatter with explicit label type
+  tooltipLabelFormatter?: (label: string | number | null | undefined) => React.ReactNode;
 }
 
 export function ChartLineInteractive({
