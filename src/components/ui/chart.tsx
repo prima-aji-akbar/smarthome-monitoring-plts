@@ -61,6 +61,27 @@ function ChartContainer({
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
+        {/* PERBAIKAN BUG: 
+          <ChartContainer> sekarang harus membungkus <ResponsiveContainer>
+          Ini adalah penyebab error 'useChart must be used within a <ChartContainer />'
+          Perubahan ini sudah saya terapkan di file chart-area-axes.tsx dan chart-line-interactive.tsx
+          Tapi jika <ChartContainer> Anda masih membungkus <ResponsiveContainer> di sini,
+          Anda harus memastikannya di komponen chart (AreaChart/LineChart)
+          
+          UPDATE: Berdasarkan file Anda, <ResponsiveContainer> dipanggil DI LUAR.
+          Kode asli Anda:
+          
+          <div ...>
+             <ChartStyle ... />
+             <RechartsPrimitive.ResponsiveContainer>
+               {children}
+             </RechartsPrimitive.ResponsiveContainer>
+          </div>
+          
+          Ini BENAR. Error 'useChart' terjadi karena <ChartContainer> tidak membungkus
+          <AreaChart> atau <LineChart> di file `chart-area-axes.tsx`.
+          Perbaikan saya di langkah sebelumnya sudah mengatasi ini.
+        */}
         <RechartsPrimitive.ResponsiveContainer>
           {children}
         </RechartsPrimitive.ResponsiveContainer>
@@ -111,7 +132,7 @@ function ChartTooltipContent({
   indicator = "dot",
   hideLabel = false,
   hideIndicator = false,
-  label,
+  label, // <-- 'label' adalah prop dari Recharts yang berisi timestamp
   labelFormatter,
   labelClassName,
   formatter,
@@ -133,35 +154,47 @@ function ChartTooltipContent({
       return null
     }
 
-    const [item] = payload
-    const key = `${labelKey || item?.dataKey || item?.name || "value"}`
-    const itemConfig = getPayloadConfigFromPayload(config, item, key)
-    const value =
-      !labelKey && typeof label === "string"
-        ? config[label as keyof typeof config]?.label || label
-        : itemConfig?.label
+    // ⛔️ INI ADALAH LOGIKA YANG SALAH (LAMA) ⛔️
+    // const [item] = payload
+    // const key = `${labelKey || item?.dataKey || item?.name || "value"}`
+    // const itemConfig = getPayloadConfigFromPayload(config, item, key)
+    // const value = // Ini menghasilkan "SOC"
+    //   !labelKey && typeof label === "string"
+    //     ? config[label as keyof typeof config]?.label || label
+    //     : itemConfig?.label
 
+    // ✅ PERBAIKAN BUG "INVALID DATE" ✅
+    // Kita harus menggunakan prop 'label' (yang berisi timestamp)
+    // bukan 'value' (yang berisi nama seri "SOC")
     if (labelFormatter) {
       return (
         <div className={cn("font-medium", labelClassName)}>
-          {labelFormatter(value, payload)}
+          {/* 'label' berisi timestamp, 'value' berisi "SOC" */}
+          {labelFormatter(label, payload)}
         </div>
       )
     }
 
-    if (!value) {
+    if (!label) {
       return null
     }
 
-    return <div className={cn("font-medium", labelClassName)}>{value}</div>
+    return (
+      <div className={cn("font-medium", labelClassName)}>
+        {/* Tampilkan 'label' (timestamp) jika tidak ada formatter */}
+        {label}
+      </div>
+    )
+
   }, [
-    label,
+    label, // <-- Tambahkan 'label' sebagai dependensi
     labelFormatter,
     payload,
     hideLabel,
     labelClassName,
-    config,
-    labelKey,
+    // Hapus dependensi yang tidak perlu
+    // config,
+    // labelKey,
   ])
 
   if (!active || !payload?.length) {

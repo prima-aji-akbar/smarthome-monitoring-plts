@@ -1,67 +1,91 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Zap, Sun, AlertCircle, Settings, Power } from "lucide-react";
+import { 
+  Zap, 
+  Sun, 
+  AlertCircle, 
+  Settings, 
+  Power, 
+  Loader2,
+  BatteryCharging,
+  CheckCircle,
+  XCircle
+} from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+import { useRealtimeData, useATSStatus } from "@/hooks/use-realtime-data";
+import { useDeviceStatus } from "@/hooks/use-device-status";
+import { useSwitchControl } from "@/hooks/use-switch-control";
+import { useDeviceConfig } from "@/hooks/use-device-config";
+
+import { 
+  formatVoltage, 
+  formatCurrent, 
+  formatPower,
+  formatSOC,
+  getSOCColor
+} from "@/lib/utils/formatters";
 
 type Source = 'PLN' | 'PLTS';
 
 export default function SwitchController() {
-  const [activeSource, setActiveSource] = useState<Source>('PLN');
-  const [autoMode, setAutoMode] = useState(true);
-  const [isOnline, setIsOnline] = useState(true);
-  const [isSwitching, setIsSwitching] = useState(false);
+  // 3. Gunakan hook untuk data realtime
+  const { pln, plts, battery, loading: dataLoading } = useRealtimeData();
+  const { activeSource } = useATSStatus();
+  const { isOnline } = useDeviceStatus();
+  const { switchToPLN, switchToPLTS, isSwitching: isManualSwitching } = useSwitchControl();
+  const { config, loading: configLoading, updateConfig } = useDeviceConfig();
 
-  // Dummy data
-  const deviceStatus = {
-    pln: {
-      voltage: 220.5,
-      current: 8.2,
-      power: 1808.1,
-      status: true,
-    },
-    plts: {
-      voltage: 48.3,
-      current: 15.5,
-      power: 748.65,
-      status: true,
-    },
-    battery: {
-      soc: 75,
-      voltage: 50.2,
-      status: true,
-    },
+  // State lokal untuk UI
+  const [isUpdatingAutoMode, setIsUpdatingAutoMode] = useState(false);
+
+  // 4. Dapatkan state dari hooks, bukan dummy data
+  const autoMode = config?.autoMode ?? true; // Default ke true jika config blm dimuat
+  const isLoading = dataLoading || configLoading;
+
+  // 5. Implementasi fungsi switch yang memanggil Firebase
+  const handleManualSwitch = async (target: Source) => {
+    if (autoMode || isManualSwitching || !isOnline) return;
+
+    if (target === 'PLN') {
+      await switchToPLN();
+    } else {
+      await switchToPLTS();
+    }
+    // 'isManualSwitching' akan otomatis update dari hook
   };
 
-  const handleManualSwitch = (target: Source) => {
-    if (autoMode || isSwitching || !isOnline) return;
-    
-    setIsSwitching(true);
-    // Simulate switching delay
-    setTimeout(() => {
-      setActiveSource(target);
-      setIsSwitching(false);
-    }, 1500);
-  };
-
-  const handleAutoModeToggle = (checked: boolean) => {
-    setAutoMode(checked);
-    if (checked) {
-      // Simulate auto mode logic
-      if (deviceStatus.battery.soc > 70 && deviceStatus.plts.status) {
-        setActiveSource('PLTS');
-      } else {
-        setActiveSource('PLN');
-      }
+  const handleAutoModeToggle = async (checked: boolean) => {
+    setIsUpdatingAutoMode(true);
+    try {
+      // Panggil fungsi update dari hook config
+      await updateConfig({ autoMode: checked });
+    } catch (error) {
+      console.error("Failed to update auto mode:", error);
+      // (Opsional: tambahkan toast error di sini)
+    } finally {
+      setIsUpdatingAutoMode(false);
     }
   };
+  
+  // Helper untuk data (menghindari error jika data null saat load)
+  const plnData = pln || { voltage: 0, current: 0, power: 0, status: false };
+  const pltsData = plts || { voltage: 0, current: 0, power: 0, status: false };
+  const batteryData = battery || { soc: 0, voltage: 0, status: false };
+
+  // UI Skeleton untuk loading awal
+  if (isLoading) {
+    return <SwitcherSkeleton />;
+  }
 
   return (
     <div className="w-full flex flex-col h-full">
-      {/* Header outside card */}
+      {/* Header */}
       <div className="mb-3 sm:mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -73,22 +97,29 @@ export default function SwitchController() {
                 Switch Controller
               </h1>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Control power source switching
+                Kontrol sumber daya dan mode otomatis
               </p>
             </div>
           </div>
           <Badge 
             variant={isOnline ? "default" : "destructive"}
-            className={isOnline ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : ""}
+            className={`transition-all ${isOnline 
+              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700" 
+              : "border border-red-300 dark:border-red-700"
+            }`}
           >
+            {isOnline ? (
+              <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+            ) : (
+              <XCircle className="w-3.5 h-3.5 mr-1.5" />
+            )}
             {isOnline ? "Online" : "Offline"}
           </Badge>
         </div>
       </div>
 
-      <Card className="border shadow-sm flex-1">{/* Removed CardHeader - using external header now */}
-
-        <CardContent className="p-6">
+      <Card className="border shadow-sm flex-1">
+        <CardContent className="p-4 sm:p-6">
           {/* Auto Mode Toggle */}
           <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-center justify-between">
@@ -96,83 +127,94 @@ export default function SwitchController() {
                 <Power className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <div>
                   <h3 className="font-semibold text-slate-800 dark:text-slate-100">
-                    Auto Mode
+                    Mode Otomatis
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Automatic switching based on battery SOC
+                    Perpindahan otomatis berdasarkan SOC Baterai
                   </p>
                 </div>
               </div>
-              <Switch
-                checked={autoMode}
-                onCheckedChange={handleAutoModeToggle}
-                disabled={!isOnline}
-              />
+              <div className="flex items-center gap-2">
+                {isUpdatingAutoMode && (
+                  <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
+                )}
+                <Switch
+                  checked={autoMode}
+                  onCheckedChange={handleAutoModeToggle}
+                  disabled={!isOnline || isUpdatingAutoMode}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Warning when auto mode is on */}
+          {/* Warning ketika auto mode aktif */}
           {autoMode && (
             <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                  Auto Mode Active
+                  Mode Otomatis Aktif
                 </p>
                 <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                  Manual switching is disabled. Turn off auto mode to control manually.
+                  Tombol manual dinonaktifkan. Matikan mode otomatis untuk beralih manual.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Current Active Source */}
+          {/* Sumber Aktif Saat Ini */}
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-              Current Active Source
+              Sumber Aktif Saat Ini
             </h3>
-            <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-slate-200 dark:border-slate-700">
+            <div className={`p-4 rounded-lg border-2 transition-all ${
+              activeSource === 'PLN' 
+                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700' 
+                : 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700'
+            }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {activeSource === 'PLN' ? (
                     <Zap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   ) : (
-                    <Sun className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                    <Sun className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                   )}
                   <div>
                     <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">
                       {activeSource}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {activeSource === 'PLN' ? '⚡ Grid Power' : '☀️ Solar Power'}
+                      {activeSource === 'PLN' ? '⚡ Listrik Jaringan (Grid)' : '☀️ Tenaga Surya (Solar)'}
                     </p>
                   </div>
                 </div>
-                {isSwitching && (
+                {/* 6. Gunakan state isManualSwitching dari hook */}
+                {isManualSwitching && (
                   <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 animate-pulse">
-                    Switching...
+                    <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                    Memindahkan...
                   </Badge>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Manual Switch Buttons */}
+          {/* Tombol Kontrol Manual */}
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Manual Switch Control
+              Kontrol Manual
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* PLN Button */}
-              <Card className={`cursor-pointer transition-all duration-200 ${
+              {/* Tombol PLN */}
+              <Card className={`transition-all duration-200 ${
                 activeSource === 'PLN' 
                   ? 'border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
                   : 'hover:border-slate-300 dark:hover:border-slate-600'
               } ${
-                autoMode || !isOnline || isSwitching 
+                autoMode || !isOnline || isManualSwitching 
                   ? 'opacity-50 cursor-not-allowed' 
-                  : ''
+                  : 'cursor-pointer'
               }`}
               onClick={() => handleManualSwitch('PLN')}
               >
@@ -195,47 +237,48 @@ export default function SwitchController() {
                           PLN
                         </h4>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Grid Power
+                          Listrik Jaringan
                         </p>
                       </div>
                     </div>
-                    {activeSource === 'PLN' && (
-                      <Badge className="bg-blue-500 text-white">Active</Badge>
+                    {activeSource === 'PLN' && !isManualSwitching && (
+                      <Badge className="bg-blue-500 text-white">Aktif</Badge>
                     )}
                   </div>
                   
+                  {/* 7. Tampilkan data asli */}
                   <div className="space-y-1.5 text-sm">
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">Voltage:</span>
                       <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {deviceStatus.pln.voltage.toFixed(1)} V
+                        {plnData.status ? formatVoltage(plnData.voltage) : 'Off'}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">Current:</span>
                       <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {deviceStatus.pln.current.toFixed(1)} A
+                        {plnData.status ? formatCurrent(plnData.current) : 'Off'}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">Power:</span>
                       <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {deviceStatus.pln.power.toFixed(1)} W
+                        {plnData.status ? formatPower(plnData.power) : 'Off'}
                       </span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* PLTS Button */}
-              <Card className={`cursor-pointer transition-all duration-200 ${
+              {/* Tombol PLTS */}
+              <Card className={`transition-all duration-200 ${
                 activeSource === 'PLTS' 
                   ? 'border-2 border-amber-500 bg-amber-50 dark:bg-amber-900/20' 
                   : 'hover:border-slate-300 dark:hover:border-slate-600'
               } ${
-                autoMode || !isOnline || isSwitching 
+                autoMode || !isOnline || isManualSwitching 
                   ? 'opacity-50 cursor-not-allowed' 
-                  : ''
+                  : 'cursor-pointer'
               }`}
               onClick={() => handleManualSwitch('PLTS')}
               >
@@ -244,13 +287,13 @@ export default function SwitchController() {
                     <div className="flex items-center gap-2">
                       <div className={`p-2 rounded-lg ${
                         activeSource === 'PLTS'
-                          ? 'bg-amber-500'
-                          : 'bg-amber-100 dark:bg-amber-900/40'
+                          ? 'bg-orange-500'
+                          : 'bg-orange-100 dark:bg-orange-900/40'
                       }`}>
                         <Sun className={`w-5 h-5 ${
                           activeSource === 'PLTS'
                             ? 'text-white'
-                            : 'text-amber-600 dark:text-amber-400'
+                            : 'text-orange-600 dark:text-orange-400'
                         }`} />
                       </div>
                       <div>
@@ -258,32 +301,33 @@ export default function SwitchController() {
                           PLTS
                         </h4>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Solar Power
+                          Tenaga Surya
                         </p>
                       </div>
                     </div>
-                    {activeSource === 'PLTS' && (
-                      <Badge className="bg-amber-500 text-white">Active</Badge>
+                    {activeSource === 'PLTS' && !isManualSwitching && (
+                      <Badge className="bg-orange-500 text-white">Aktif</Badge>
                     )}
                   </div>
                   
+                  {/* 7. Tampilkan data asli */}
                   <div className="space-y-1.5 text-sm">
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">Voltage:</span>
                       <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {deviceStatus.plts.voltage.toFixed(1)} V
+                        {pltsData.status ? formatVoltage(pltsData.voltage) : 'Off'}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">Current:</span>
                       <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {deviceStatus.plts.current.toFixed(1)} A
+                        {pltsData.status ? formatCurrent(pltsData.current) : 'Off'}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">Power:</span>
                       <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {deviceStatus.plts.power.toFixed(1)} W
+                        {pltsData.status ? formatPower(pltsData.power) : 'Off'}
                       </span>
                     </div>
                   </div>
@@ -292,53 +336,90 @@ export default function SwitchController() {
             </div>
           </div>
 
-          {/* Battery Status */}
-          <div className="mt-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
-            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
-              Battery Status
+          {/* Status Baterai */}
+          <div className={`mt-6 p-4 rounded-lg border ${
+            batteryData.status 
+              ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
+              : 'bg-slate-50 dark:bg-slate-800/20 border-slate-200 dark:border-slate-700'
+          }`}>
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2">
+              <BatteryCharging className="w-5 h-5" />
+              Status Baterai
             </h3>
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">SOC</p>
-                <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
-                  {deviceStatus.battery.soc}%
+                <p className={`text-lg font-bold ${getSOCColor(batteryData.soc)}`}>
+                  {batteryData.status ? formatSOC(batteryData.soc) : 'N/A'}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Voltage</p>
-                <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
-                  {deviceStatus.battery.voltage.toFixed(1)} V
+                <p className={`text-lg font-bold ${
+                  batteryData.status ? 'text-slate-700 dark:text-slate-300' : 'text-slate-500'
+                }`}>
+                  {batteryData.status ? formatVoltage(batteryData.voltage) : 'N/A'}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Status</p>
-                <Badge className={deviceStatus.battery.status 
+                <Badge className={batteryData.status 
                   ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-                  : "bg-red-100 text-red-700"
+                  : "bg-slate-100 text-slate-700"
                 }>
-                  {deviceStatus.battery.status ? "Good" : "Error"}
+                  {batteryData.status ? "Active" : "Offline"}
                 </Badge>
               </div>
             </div>
           </div>
+          
+          {/* 8. Hapus tombol "Refresh" dan "Emergency Stop" */}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
-          {/* Action Buttons */}
-          <div className="mt-6 flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1"
-              disabled={!isOnline}
-            >
-              Refresh Status
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-              disabled={!isOnline}
-            >
-              Emergency Stop
-            </Button>
+// Komponen Skeleton untuk loading
+const SwitcherSkeleton = () => {
+  return (
+    <div className="w-full flex flex-col h-full">
+      {/* Header */}
+      <div className="mb-3 sm:mb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Skeleton className="w-10 h-10 rounded-lg" />
+            <div>
+              <Skeleton className="h-6 w-48 mb-2" />
+              <Skeleton className="h-4 w-32" />
+            </div>
           </div>
+          <Skeleton className="h-8 w-20 rounded-full" />
+        </div>
+      </div>
+
+      <Card className="border shadow-sm flex-1">
+        <CardContent className="p-4 sm:p-6">
+          {/* Auto Mode Skeleton */}
+          <Skeleton className="h-20 w-full mb-6 rounded-lg" />
+
+          {/* Active Source Skeleton */}
+          <div className="mb-6">
+            <Skeleton className="h-4 w-32 mb-3" />
+            <Skeleton className="h-24 w-full rounded-lg" />
+          </div>
+
+          {/* Manual Switch Skeleton */}
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-32" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Skeleton className="h-36 w-full rounded-lg" />
+              <Skeleton className="h-36 w-full rounded-lg" />
+            </div>
+          </div>
+
+          {/* Battery Status Skeleton */}
+          <Skeleton className="h-28 w-full mt-6 rounded-lg" />
         </CardContent>
       </Card>
     </div>

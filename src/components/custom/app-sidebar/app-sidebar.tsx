@@ -1,6 +1,6 @@
 "use client"
 
-import { Logs, LogOut, LayoutDashboard, Moon, Sun, Joystick } from "lucide-react"
+import { Logs, LogOut, LayoutDashboard, Moon, Sun, Joystick, Cable } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image";
 import { useTheme } from "next-themes"
@@ -37,6 +37,11 @@ const items = [
     title: "Event Log",
     url: "/views/event-log",
     icon: Logs,
+  },
+  {
+    title: "Test Connection",
+    url: "/views/test-connection",
+    icon: Cable,
   },
   {
     title: "Logout",

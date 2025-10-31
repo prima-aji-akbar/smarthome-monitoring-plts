@@ -23,9 +23,15 @@ export interface BatteryData {
   current: number;
   power: number;
   energy: number;
-  soc: number;
   consumedWh: number;
   status: boolean;
+}
+
+export interface ProcessedBatteryData extends BatteryData {
+  soc: number; 
+  socStatus: 'critical' | 'low' | 'normal' | 'good' | 'full';
+  remainingWh: number;
+  estimatedRuntime: number;
 }
 
 export interface ATSStatus {

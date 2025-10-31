@@ -1,7 +1,8 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getDatabase, Database } from 'firebase/database';
 import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+// 1. Ubah getFirestore menjadi initializeFirestore
+import { initializeFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -18,7 +19,11 @@ const app: FirebaseApp = getApps().length > 0
   : initializeApp(firebaseConfig);
 
 const database: Database = getDatabase(app);
-const firestore: Firestore = getFirestore(app);
+
+const firestore: Firestore = initializeFirestore(app, {
+  ignoreUndefinedProperties: true
+});
+
 const auth: Auth = getAuth(app);
 
-export { app, database, auth,firestore };
+export { app, database, auth, firestore }; // 3. Pastikan firestore diekspor

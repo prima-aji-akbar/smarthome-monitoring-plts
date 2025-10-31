@@ -3,42 +3,21 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Heart, Zap, History, ArrowLeftRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useDeviceStatus } from "@/hooks/use-device-status";
+import { useATSStatus } from "@/hooks/use-realtime-data";
+import { useEventLog } from "@/hooks/use-event-logs";
+import { formatTimestamp, formatUptime } from "@/lib/utils/formatters";
 
 export default function Overview() {
-    const [uptime, setUptime] = useState(0);
-    const [systemStatus,] = useState<'online' | 'offline'>('online');
-    const [currentSource,] = useState<'PLN' | 'PLTS'>('PLTS');
-    const [lastSwitch,] = useState(new Date());
+    const { isOnline, uptime } = useDeviceStatus();
+    const { activeSource } = useATSStatus();
+    
+    const { events, loading: logLoading } = useEventLog(1);
+    const lastEvent = events?.[0];
 
-    // Uptime counter
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setUptime(prev => prev + 1);
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    // Format uptime to HH:MM:SS
-    const formatUptime = (seconds: number) => {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    };
-
-    // Format timestamp
-    const formatTimestamp = (date: Date) => {
-        return date.toLocaleString('id-ID', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    };
+        const lastSwitchTime = lastEvent?.timestamp ?? 0;
+        const lastSwitchFrom = lastEvent?.from ?? '...';
+        const lastSwitchTo = lastEvent?.to ?? '...';
 
     return (
         <div className="w-full flex flex-col h-full">
@@ -47,20 +26,24 @@ export default function Overview() {
             </div>
             
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-5 flex-1">
+                
                 {/* Status Card */}
                 <Card className="flex flex-col bg-gradient-to-br from-blue-400 to-blue-500 border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
                     <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
                             <h2 className="text-white font-bold text-xs sm:text-sm lg:text-base">Status</h2>
                             <div className="bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-2.5">
-                                <Heart className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white animate-pulse" fill="white" />
+                                <Heart 
+                                    className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white ${isOnline ? 'animate-pulse' : ''}`} 
+                                    fill={isOnline ? "white" : "none"} 
+                                />
                             </div>
                         </div>
                     </CardHeader>
                     <Separator className="bg-white/20" />
                     <CardContent className="p-3 sm:p-4 flex-1 flex flex-col justify-end">
                         <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2.5 sm:p-3 lg:p-4 shadow-md">
-                            {systemStatus === 'online' ? (
+                            {isOnline ? (
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <div className="relative">
@@ -84,7 +67,7 @@ export default function Overview() {
                                         </h1>
                                     </div>
                                     <p className="text-[10px] sm:text-xs text-red-600 mt-1 font-medium">
-                                        System Down
+                                        Device Disconnected
                                     </p>
                                 </div>
                             )}
@@ -105,23 +88,23 @@ export default function Overview() {
                     <Separator className="bg-white/20" />
                     <CardContent className="p-3 sm:p-4 flex-1 flex flex-col justify-end">
                         <div className={`bg-white/95 backdrop-blur-sm rounded-xl p-2.5 sm:p-3 lg:p-4 shadow-md border-l-4 ${
-                            currentSource === 'PLN' 
+                            activeSource === 'PLN' 
                                 ? 'border-blue-500' 
                                 : 'border-orange-500'
                         }`}>
                             <h1 className={`text-base sm:text-lg lg:text-2xl font-bold ${
-                                currentSource === 'PLN'
+                                activeSource === 'PLN'
                                     ? 'text-blue-700'
                                     : 'text-orange-700'
                             }`}>
-                                {currentSource}
+                                {activeSource}
                             </h1>
                             <p className={`text-[10px] sm:text-xs mt-1 font-medium ${
-                                currentSource === 'PLN'
+                                activeSource === 'PLN'
                                     ? 'text-blue-600'
                                     : 'text-orange-600'
                             }`}>
-                                {currentSource === 'PLN' ? '⚡ Grid Power' : '☀️ Solar Power'}
+                                {activeSource === 'PLN' ? '⚡ Grid Power' : '☀️ Solar Power'}
                             </p>
                         </div>
                     </CardContent>
@@ -141,7 +124,7 @@ export default function Overview() {
                     <CardContent className="p-3 sm:p-4 flex-1 flex flex-col justify-end">
                         <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2.5 sm:p-3 lg:p-4 shadow-md border-l-4 border-purple-500">
                             <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-purple-700 font-mono tracking-tight">
-                                {formatUptime(uptime)}
+                                {isOnline ? formatUptime(uptime) : '00:00:00'}
                             </h1>
                             <p className="text-[10px] sm:text-xs text-purple-600 mt-1 font-medium">
                                 ⏱️ Hours Running
@@ -164,15 +147,15 @@ export default function Overview() {
                     <CardContent className="p-3 sm:p-4 flex-1 flex flex-col justify-end">
                         <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2.5 sm:p-3 lg:p-4 shadow-md border-l-4 border-indigo-500">
                             <p className="text-[10px] sm:text-xs lg:text-sm text-slate-700 font-semibold leading-relaxed">
-                                {formatTimestamp(lastSwitch)}
+                                {logLoading ? 'Loading...' : (lastSwitchTime > 0 ? formatTimestamp(lastSwitchTime) : 'No switch data')}
                             </p>
                             <div className="flex items-center gap-1.5 mt-1.5">
                                 <span className="text-[9px] sm:text-[10px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                                    PLN
+                                    {lastSwitchFrom}
                                 </span>
                                 <ArrowLeftRight className="w-3 h-3 text-slate-400" />
                                 <span className="text-[9px] sm:text-[10px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                                    PLTS
+                                    {lastSwitchTo}
                                 </span>
                             </div>
                         </div>

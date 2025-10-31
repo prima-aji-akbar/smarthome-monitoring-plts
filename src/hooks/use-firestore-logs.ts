@@ -1,14 +1,20 @@
 "use client"
 
-import { useState, useEffect } from 'react';
-import { fetchRecentLogs, fetchLogsByDateRange, FirestoreLog } from '@/lib/firebase/firestore';
+// 1. Impor 'useCallback'
+import { useState, useEffect, useCallback } from 'react';
+import { 
+  fetchRecentLogs, 
+  fetchLogsByDateRange, 
+  ProcessedFirestoreLog
+} from '@/lib/firebase/firestore';
 
 export function useFirestoreLogs(limitCount: number = 50) {
-  const [logs, setLogs] = useState<FirestoreLog[]>([]);
+  const [logs, setLogs] = useState<ProcessedFirestoreLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadLogs = async () => {
+  // 2. Bungkus 'loadLogs' dengan 'useCallback'
+  const loadLogs = useCallback(async () => {
     try {
       setLoading(true);
       const data = await fetchRecentLogs(limitCount);
@@ -20,25 +26,24 @@ export function useFirestoreLogs(limitCount: number = 50) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limitCount]); // Dependensi pada limitCount
 
   useEffect(() => {
     loadLogs();
-  }, [limitCount]);
+  }, [loadLogs]); // 'loadLogs' sekarang stabil
 
-  const refresh = () => {
-    loadLogs();
-  };
-
-  return { logs, loading, error, refresh };
+  // 3. Kembalikan 'loadLogs' sebagai 'refresh'
+  return { logs, loading, error, refresh: loadLogs };
 }
 
 export function useFirestoreLogsByDate() {
-  const [logs, setLogs] = useState<FirestoreLog[]>([]);
+  const [logs, setLogs] = useState<ProcessedFirestoreLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadLogsByDateRange = async (startDate: Date, endDate: Date) => {
+  // 4. Bungkus 'loadLogsByDateRange' dengan 'useCallback'
+  // Ini adalah perbaikan utama untuk 'vaw-activity.tsx'
+  const loadLogsByDateRange = useCallback(async (startDate: Date, endDate: Date) => {
     try {
       setLoading(true);
       const data = await fetchLogsByDateRange(startDate, endDate);
@@ -50,7 +55,7 @@ export function useFirestoreLogsByDate() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Tidak ada dependensi, fungsi ini stabil
 
   return { logs, loading, error, loadLogsByDateRange };
 }
