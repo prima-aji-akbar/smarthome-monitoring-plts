@@ -19,15 +19,19 @@ type SocDataPoint = {
 };
 
 // 1. Definisikan fungsi formatter di sini
-const formatTooltipTimestamp = (timestamp: number) => {
-  if (!timestamp) return "Invalid Date";
-  return new Date(timestamp).toLocaleString('id-ID', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+const formatTooltipTimestamp = (label: string | number | null | undefined) => {
+  if (label === null || label === undefined || label === "") return "Invalid Date";
+
+  const timestamp = typeof label === "string" ? parseInt(label, 10) : label;
+  if (typeof timestamp !== "number" || Number.isNaN(timestamp)) return "Invalid Date";
+
+  return new Date(timestamp).toLocaleString("id-ID", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   });
 };
 
@@ -80,7 +84,9 @@ export default function BatteryUsage() {
     }
   }, [liveData?.timestamp, liveBattery?.soc, isHydrated]); 
 
-  const formatChartTime = (timestamp: number) => {
+  const formatChartTime = (value: string | number | null | undefined) => {
+    if (!value) return "";
+    const timestamp = typeof value === "string" ? parseInt(value) : value;
     return new Date(timestamp).toLocaleTimeString('id-ID', {
       hour: '2-digit',
       minute: '2-digit',
