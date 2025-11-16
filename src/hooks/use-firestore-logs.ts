@@ -22,7 +22,6 @@ export function useFirestoreLogs(limitCount: number = 50) {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load logs');
-      console.error('Error loading logs:', err);
     } finally {
       setLoading(false);
     }
@@ -51,7 +50,6 @@ export function useFirestoreLogsByDate() {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load logs');
-      console.error('Error loading logs by date:', err);
     } finally {
       setLoading(false);
     }

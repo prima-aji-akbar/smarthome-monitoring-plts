@@ -28,7 +28,6 @@ export function useDeviceConfig() {
         setLoading(false);
       },
       (err) => {
-        console.error('Firebase config error:', err);
         setError(err.message);
         setLoading(false);
       }

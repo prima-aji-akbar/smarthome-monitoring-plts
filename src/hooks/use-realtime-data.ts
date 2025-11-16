@@ -29,7 +29,6 @@ export function useRealtimeData() {
             const processed = processBatteryData(realtimeData.battery);
             setProcessedBattery(processed);
           } else {
-            console.warn('⚠️ Invalid battery data received');
             setProcessedBattery(null);
           }
           
@@ -43,7 +42,6 @@ export function useRealtimeData() {
         setLoading(false);
       },
       (err) => {
-        console.error('Firebase error:', err);
         setError(err.message);
         setLoading(false);
         setIsConnected(false);

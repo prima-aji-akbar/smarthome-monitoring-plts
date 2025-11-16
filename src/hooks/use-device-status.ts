@@ -20,7 +20,6 @@ export function useDeviceStatus() {
         setIsOnline(true);
       },
       (error) => {
-        console.error('Device status error:', error);
         setIsOnline(false);
       }
     );

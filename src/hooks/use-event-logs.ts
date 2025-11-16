@@ -45,7 +45,6 @@ export function useEventLog(limit: number = 50) {
         setLoading(false);
       },
       (err) => {
-        console.error('Event log error:', err);
         setError(err.message);
         setLoading(false);
       }

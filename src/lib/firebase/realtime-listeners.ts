@@ -19,7 +19,6 @@ export function listenToPLNData(
       }
     },
     (error) => {
-      console.error('PLN data listener error:', error);
       if (onError) onError(error);
     }
   );
@@ -44,7 +43,6 @@ export function listenToPLTSData(
       }
     },
     (error) => {
-      console.error('PLTS data listener error:', error);
       if (onError) onError(error);
     }
   );
@@ -69,7 +67,6 @@ export function listenToBatteryData(
       }
     },
     (error) => {
-      console.error('Battery data listener error:', error);
       if (onError) onError(error);
     }
   );
@@ -94,7 +91,6 @@ export function listenToATSStatus(
       }
     },
     (error) => {
-      console.error('ATS status listener error:', error);
       if (onError) onError(error);
     }
   );
@@ -119,7 +115,6 @@ export function listenToTimestamp(
       }
     },
     (error) => {
-      console.error('Timestamp listener error:', error);
       if (onError) onError(error);
     }
   );
@@ -144,7 +139,6 @@ export function listenToManualSwitch(
       }
     },
     (error) => {
-      console.error('Manual switch listener error:', error);
       if (onError) onError(error);
     }
   );

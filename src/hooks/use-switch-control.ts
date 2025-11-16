@@ -17,13 +17,10 @@ export function useSwitchControl() {
     try {
       const controlRef = ref(database, `devices/${DEVICE_ID}/control/manualSwitch`);
       await set(controlRef, 'PLN');
-      
-      console.log('✅ Switch to PLN command sent');
       return true;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to switch';
       setError(errorMsg);
-      console.error('❌ Switch error:', err);
       return false;
     } finally {
       setIsSwitching(false);
@@ -38,12 +35,10 @@ export function useSwitchControl() {
       const controlRef = ref(database, `devices/${DEVICE_ID}/control/manualSwitch`);
       await set(controlRef, 'PLTS');
       
-      console.log('✅ Switch to PLTS command sent');
       return true;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to switch';
       setError(errorMsg);
-      console.error('❌ Switch error:', err);
       return false;
     } finally {
       setIsSwitching(false);

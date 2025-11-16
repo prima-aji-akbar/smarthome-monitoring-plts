@@ -71,7 +71,6 @@ function parseTimestamp(data: FirestoreDocData): number {
   }
 
   // Fallback: gunakan waktu sekarang
-  console.warn('⚠️ Invalid timestamp format:', data.timestamp);
   return Date.now();
 }
 
@@ -80,16 +79,10 @@ function parseFirestoreDoc(doc: QueryDocumentSnapshot<DocumentData>): FirestoreL
   const data = doc.data();
   
   // Debug log untuk melihat struktur data
-  console.log('📄 Raw Firestore doc:', doc.id, data);
   
   // ✅ Parse timestamp dengan benar
   const timestamp = parseTimestamp(data);
   
-  console.log('🕐 Parsed timestamp:', {
-    raw: data.timestamp,
-    parsed: timestamp,
-    date: new Date(timestamp).toLocaleString('id-ID')
-  });
   
   // ✅ Parse nested fields dari format Firestore
   type FirestoreFieldValue =
@@ -174,21 +167,17 @@ function processFirestoreLog(log: FirestoreLog): ProcessedFirestoreLog {
 
 export async function fetchRecentLogs(limitCount: number = 50): Promise<ProcessedFirestoreLog[]> {
   try {
-    console.log('🔍 Fetching recent logs from Firestore...');
     
     const logsRef = collection(firestore, `devices/${DEVICE_ID}/logs`);
     const q = query(logsRef, orderBy('timestamp', 'desc'), limit(limitCount));
     
     const snapshot = await getDocs(q);
-    
-    console.log(`📊 Found ${snapshot.size} log documents`);
-    
+        
     // ✅ Parse dokumen dengan fungsi baru
     const rawLogs = snapshot.docs.map(doc => parseFirestoreDoc(doc));
     
     return rawLogs.map(processFirestoreLog);
   } catch (error) {
-    console.error('❌ Error fetching Firestore logs:', error);
     throw error;
   }
 }
@@ -199,18 +188,12 @@ export async function fetchLogsByDateRange(
   limitCount: number = 100
 ): Promise<ProcessedFirestoreLog[]> {
   try {
-    console.log('🔍 Fetching logs by date range:', {
-      start: startDate.toLocaleString('id-ID'),
-      end: endDate.toLocaleString('id-ID')
-    });
     
     const logsRef = collection(firestore, `devices/${DEVICE_ID}/logs`);
     
     const startTimestamp = startDate.getTime();
     const endTimestamp = endDate.getTime();
-    
-    console.log('📅 Timestamp range:', { startTimestamp, endTimestamp });
-    
+        
     const q = query(
       logsRef,
       where('timestamp', '>=', startTimestamp),
@@ -221,14 +204,11 @@ export async function fetchLogsByDateRange(
     
     const snapshot = await getDocs(q);
     
-    console.log(`📊 Found ${snapshot.size} logs in date range`);
-    
     // ✅ Parse dokumen dengan fungsi baru
     const rawLogs = snapshot.docs.map(doc => parseFirestoreDoc(doc));
     
     return rawLogs.map(processFirestoreLog);
   } catch (error) {
-    console.error('❌ Error fetching logs by date range:', error);
     throw error;
   }
 }

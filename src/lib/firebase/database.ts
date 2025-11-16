@@ -27,7 +27,6 @@ export async function fetchRealtimeData(): Promise<RealtimeData | null> {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching realtime data:', error);
     throw error;
   }
 }
@@ -36,10 +35,8 @@ export async function sendSwitchCommand(target: 'PLN' | 'PLTS'): Promise<boolean
   try {
     const controlRef = ref(database, `devices/${DEVICE_ID}/control/manualSwitch`);
     await set(controlRef, target);
-    console.log(`✅ Switch command sent: ${target}`);
     return true;
   } catch (error) {
-    console.error('❌ Error sending switch command:', error);
     throw error;
   }
 }
@@ -62,7 +59,6 @@ export async function fetchEventLog(limit: number = 50): Promise<SwitchEvent[]> 
     }
     return [];
   } catch (error) {
-    console.error('Error fetching event log:', error);
     throw error;
   }
 }
@@ -83,7 +79,6 @@ export function subscribeToRealtimeData(
       }
     },
     (error) => {
-      console.error('Realtime data subscription error:', error);
       if (onError) onError(error);
     }
   );
@@ -128,9 +123,7 @@ export async function updateDeviceConfig(config: Partial<DeviceConfig>): Promise
   try {
     const configRef = ref(database, `devices/${DEVICE_ID}/config`);
     await update(configRef, config);
-    console.log('✅ Device config updated');
   } catch (error) {
-    console.error('❌ Error updating device config:', error);
     throw error;
   }
 }
