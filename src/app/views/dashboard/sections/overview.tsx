@@ -22,7 +22,7 @@ export default function Overview() {
     return (
         <div className="w-full flex flex-col h-full">
             <div className="mb-3 sm:mb-4">
-                <h1 className="font-bold text-lg sm:text-xl lg:text-2xl text-slate-800 dark:text-slate-100">Overview</h1>
+                <h1 className="font-bold text-lg sm:text-xl lg:text-2xl text-slate-800 dark:text-slate-100">Overview ahahha</h1>
             </div>
             
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-5 flex-1">
