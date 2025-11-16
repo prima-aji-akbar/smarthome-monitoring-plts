@@ -3,8 +3,15 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// 1. Impor "PlusSquare" untuk ikon tombol baru
-import { Calendar, Database, Eye, Loader2, AlertTriangle, PlusSquare } from "lucide-react";
+// 1. Impor "RefreshCw" untuk ikon tombol baru
+import { 
+  Calendar, 
+  Database, 
+  Eye, 
+  Loader2, 
+  AlertTriangle, 
+  RefreshCw // <-- Mengganti PlusSquare
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -38,7 +45,6 @@ export default function TableEvent() {
   
   const [selectedLog, setSelectedLog] = useState<ProcessedFirestoreLog | null>(null);
 
-  // ... (fungsi renderPaginationItems, getSourceColor, getSourceIcon, skeletons... tetap sama)
   const totalPages = Math.ceil(logs.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -145,20 +151,44 @@ export default function TableEvent() {
           </div>
         </div>
         
-        {/* 6. Tambahkan tombol di sini */}
+        {/* 6. Tombol refresh ditambahkan di sini */}
         <div className="flex w-full sm:w-auto items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
             <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-300" />
             <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : `${logs.length} Logs`}
+              {/* Logika loading diubah agar hanya tampil saat fetch awal */}
+              {loading && logs.length === 0 ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                `${logs.length} Logs`
+              )}
             </span>
           </div>
+
+          {/* PERBAIKAN: Tombol Refresh ditambahkan 
+            - Menggunakan fungsi 'refresh' dari hook.
+            - Menampilkan 'Loader2' saat loading.
+          */}
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={() => refresh()} 
+            disabled={loading}
+            className="shadow-sm"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            <span className="sr-only">Refresh Logs</span>
+          </Button>
+
         </div>
       </div>
 
       <Card className="border shadow-sm bg-white dark:bg-slate-900">
         <CardContent className="p-4 sm:p-6">
-          {/* ... (Sisa dari tabel, mobile cards, dan pagination tetap SAMA) ... */}
            {/* Desktop Table */}
           <div className="hidden md:block rounded-md border">
             <Table>

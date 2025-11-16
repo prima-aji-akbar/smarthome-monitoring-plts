@@ -1,12 +1,15 @@
 "use client"
 
-import { useMemo } from "react";
+// 1. Impor useState, useEffect, dan useRealtimeData
+import { useMemo, useState, useEffect } from "react";
 import { ChartAreaAxes } from "@/components/custom/charts/chart-area-axes";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Zap, Activity, Loader2 } from "lucide-react";
+// 2. Impor Ikon BarChartBig
+import { Heart, Zap, Activity, Loader2, BarChartBig } from "lucide-react";
 import { ChartConfig } from "@/components/ui/chart";
 
 import { useFirestoreLogs } from "@/hooks/use-firestore-logs";
+import { useRealtimeData } from "@/hooks/use-realtime-data";
 
 const sharedChartConfig = {
   pln: { label: "PLN", color: "hsl(221.2 83.2% 53.3%)" },
@@ -33,13 +36,10 @@ const ChartSkeleton = ({ title, Icon }: { title: string, Icon: React.ElementType
   </Card>
 );
 
-// 1. Definisikan fungsi formatter di sini
 const formatTooltipTimestamp = (label: string | number | null | undefined) => {
   if (label === null || label === undefined || label === "") return "Invalid Date";
-
   const timestamp = typeof label === "string" ? parseInt(label, 10) : label;
   if (typeof timestamp !== "number" || Number.isNaN(timestamp)) return "Invalid Date";
-
   return new Date(timestamp).toLocaleString("id-ID", {
     day: "2-digit",
     month: "2-digit",
@@ -50,21 +50,60 @@ const formatTooltipTimestamp = (label: string | number | null | undefined) => {
   });
 };
 
-export default function VawActivity() {
-  const { logs, loading } = useFirestoreLogs(100);
+type VawDataPoint = {
+  time: number;
+  pln_voltage: number;
+  pln_current: number;
+  pln_power: number;
+  plts_voltage: number;
+  plts_current: number;
+  plts_power: number;
+};
 
-  const chartableData = useMemo(() => {
-    const reversedLogs = [...logs].reverse();
-    return reversedLogs.map((log) => ({
-      time: log.timestamp,
-      pln_voltage: log.pln.status ? log.pln.voltage : 0,
-      pln_current: log.pln.status ? log.pln.current : 0,
-      pln_power: log.pln.status ? log.pln.power : 0,
-      plts_voltage: log.plts.status ? log.plts.voltage : 0,
-      plts_current: log.plts.status ? log.plts.current : 0,
-      plts_power: log.plts.status ? log.plts.power : 0,
-    }));
-  }, [logs]);
+export default function VawActivity() {
+  const { logs, loading: logsLoading } = useFirestoreLogs(100);
+  const { data: liveData, pln, plts } = useRealtimeData();
+
+  const [chartableData, setChartableData] = useState<VawDataPoint[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    if (logs.length > 0 && !isHydrated) {
+      const reversedLogs = [...logs].reverse();
+      const historicalPoints = reversedLogs.map((log) => ({
+        time: log.timestamp,
+        pln_voltage: log.pln.status ? log.pln.voltage : 0,
+        pln_current: log.pln.status ? log.pln.current : 0,
+        pln_power: log.pln.status ? log.pln.power : 0,
+        plts_voltage: log.plts.status ? log.plts.voltage : 0,
+        plts_current: log.plts.status ? log.plts.current : 0,
+        plts_power: log.plts.status ? log.plts.power : 0,
+      }));
+      setChartableData(historicalPoints);
+      setIsHydrated(true);
+    }
+  }, [logs, isHydrated]);
+
+  useEffect(() => {
+    if (liveData && pln && plts && isHydrated) {
+      const newPoint: VawDataPoint = {
+        time: liveData.timestamp,
+        pln_voltage: pln.status ? pln.voltage : 0,
+        pln_current: pln.status ? pln.current : 0,
+        pln_power: pln.status ? pln.power : 0,
+        plts_voltage: plts.status ? plts.voltage : 0,
+        plts_current: plts.status ? plts.current : 0,
+        plts_power: plts.status ? plts.power : 0,
+      };
+
+      setChartableData((prevData) => {
+        if (prevData.length > 0 && liveData.timestamp <= prevData[prevData.length - 1].time) {
+          return prevData;
+        }
+        return [...prevData, newPoint].slice(-100);
+      });
+    }
+  }, [liveData?.timestamp, isHydrated, pln, plts]); 
 
   const voltageConfig = {
     pln: { ...sharedChartConfig.pln, label: "PLN (V)" },
@@ -93,11 +132,19 @@ export default function VawActivity() {
     });
   };
 
-  if (loading) { /* ... (skeleton tetap sama) ... */
+  const isLoading = logsLoading || !isHydrated;
+
+  if (isLoading && chartableData.length === 0) { 
     return (
       <div className="w-full">
         <div className="mb-3">
-          <h1 className="font-bold text-lg sm:text-xl">VAW Activity (Last 100 Logs)</h1>
+          {/* Judul Skeleton */}
+          <div className="flex items-center gap-2">
+            <BarChartBig className="w-6 h-6 text-slate-400" />
+            <h1 className="font-bold text-lg sm:text-xl text-slate-800 dark:text-slate-100">
+              Grafik Sensor Terperinci (V/A/W)
+            </h1>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
           <ChartSkeleton title="Voltage" Icon={Heart} />
@@ -111,7 +158,14 @@ export default function VawActivity() {
   return (
     <div className="w-full">
       <div className="mb-3">
-        <h1 className="font-bold text-lg sm:text-xl text-slate-800 dark:text-slate-100">VAW Activity (Last 100 Logs)</h1>
+        {/* PERBAIKAN: Judul diubah agar lebih deskriptif dan konsisten 
+        */}
+        <div className="flex items-center gap-2">
+          <BarChartBig className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+          <h1 className="font-bold text-lg sm:text-xl text-slate-800 dark:text-slate-100">
+            Grafik Sensor Terperinci (V/A/W)
+          </h1>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
         {/* Voltage Chart */}
@@ -129,7 +183,6 @@ export default function VawActivity() {
                     chartConfig={voltageConfig}
                     xAxisDataKey="time"
                     xAxisTickFormatter={formatChartTime}
-                    // 2. Berikan prop formatter ke chart
                     tooltipLabelFormatter={formatTooltipTimestamp} 
                     wrapperClassName="bg-gradient-to-br from-blue-50 to-slate-50 dark:from-blue-950/30 dark:to-slate-950/30 rounded-xl p-4 border-2 border-blue-200 dark:border-blue-800 shadow-lg"
                     heightClassName="h-[150px] sm:h-[180px] md:h-[200px]" 
@@ -155,7 +208,6 @@ export default function VawActivity() {
                     chartConfig={currentConfig}
                     xAxisDataKey="time"
                     xAxisTickFormatter={formatChartTime}
-                    // 3. Berikan prop formatter ke chart
                     tooltipLabelFormatter={formatTooltipTimestamp}
                     wrapperClassName="bg-gradient-to-br from-green-50 to-slate-50 dark:from-green-950/30 dark:to-slate-950/30 rounded-xl p-4 border-2 border-green-200 dark:border-green-800 shadow-lg"
                     heightClassName="h-[150px] sm:h-[180px] md:h-[200px]"
@@ -181,7 +233,6 @@ export default function VawActivity() {
                     chartConfig={powerConfig}
                     xAxisDataKey="time"
                     xAxisTickFormatter={formatChartTime}
-                    // 4. Berikan prop formatter ke chart
                     tooltipLabelFormatter={formatTooltipTimestamp}
                     wrapperClassName="bg-gradient-to-br from-red-50 to-slate-50 dark:from-red-950/30 dark:to-slate-950/30 rounded-xl p-4 border-2 border-red-200 dark:border-red-800 shadow-lg"
                     heightClassName="h-[150px] sm:h-[180px] md:h-[200px]"
